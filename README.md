@@ -4,8 +4,8 @@ A console base UI menu (old school) navigation using arrow keys
 
 # How it looks
 
-![Gif animation](https://gfycat.com/gifs/detail/FlawedForkedHochstettersfrog)
-![](https://gfycat.com/gifs/detail/FlawedForkedHochstettersfrog)
+![](https://thumbs.gfycat.com/FlawedForkedHochstettersfrog-small.gif)
+
 
 # Usage example
 ```C#
