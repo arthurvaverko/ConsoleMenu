@@ -56,7 +56,7 @@ namespace ConsoleUI
 			//set the cursor just after the menu so that the program can continue after the menu
 			Console.SetCursorPosition(0, bottomOffset);
 			Console.CursorVisible = true;
-			MenuItems[selectedItemIndex].CallBack.Invoke(MenuItems[selectedItemIndex]);
+			MenuItems[selectedItemIndex].CallBack.Invoke(MenuItems[selectedItemIndex].UnderlyingObject);
 		}
 
 		private void HandleKeyPress(ConsoleKey pressedKey)
@@ -94,8 +94,8 @@ namespace ConsoleUI
 	public class ConsoleMenuItem<T>
 	{
 		public string Name { get; set; }
-		public Action<ConsoleMenuItem<T>> CallBack { get; set; }
-		protected T UnderlyingObject { get; set; }
+		public Action<T> CallBack { get; set; }
+		public T UnderlyingObject { get; set; }
 
 		public override int GetHashCode()
 		{
@@ -115,22 +115,12 @@ namespace ConsoleUI
 		{
 			return $"{Name} (data: {UnderlyingObject.ToString()})";
 		}
-	}
 
-
-
-
-	public class ConsoleMenu : ConsoleMenu<string>
-	{
-		public ConsoleMenu(string description, IEnumerable<ConsoleMenuItem<string>> menuItems) : base(description, menuItems) { }
-	}
-
-	public class ConsoleMenuItem : ConsoleMenuItem<string>
-	{
-		public ConsoleMenuItem(string label, Action<string> callback)
+		public ConsoleMenuItem(string label, Action<T> callback, T underlyingObject)
 		{
 			Name = label;
-			CallBack = (selectdItem) => callback.Invoke(selectdItem.Name);
+			CallBack = callback;
+			UnderlyingObject = underlyingObject;
 		}
 	}
 
