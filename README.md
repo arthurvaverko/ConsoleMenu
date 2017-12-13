@@ -1,4 +1,5 @@
 # Console Menu
+[![Build status](https://ci.appveyor.com/api/projects/status/myb3cpel269xv0iu?svg=true)](https://ci.appveyor.com/project/arthurvaverko/consolemenu)
 
 A console base UI menu (old school) navigation using arrow keys
 
