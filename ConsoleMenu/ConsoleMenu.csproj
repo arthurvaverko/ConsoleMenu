@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ConsoleMenu</RootNamespace>
-    <AssemblyName>ConsoleMenu</AssemblyName>
+    <AssemblyName>ConsoleUI.ConsoleMenu</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
