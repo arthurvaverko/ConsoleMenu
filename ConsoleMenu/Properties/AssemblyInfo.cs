@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ConsoleMenu")]
+[assembly: AssemblyTitle("ConsoleUI.ConsoleMenu")]
 [assembly: AssemblyDescription("A console base UI menu (old school) navigation using arrow keys")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Arthur Vaverko")]
