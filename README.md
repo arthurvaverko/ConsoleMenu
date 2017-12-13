@@ -1,5 +1,7 @@
 # Console Menu
 [![Build status](https://ci.appveyor.com/api/projects/status/myb3cpel269xv0iu?svg=true)](https://ci.appveyor.com/project/arthurvaverko/consolemenu)
+[![Nuget Version](https://img.shields.io/nuget/v/ConsoleUI.ConsoleMenu.svg)](https://www.nuget.org/packages/ConsoleUI.ConsoleMenu/)
+
 
 A console base UI menu (old school) navigation using arrow keys
 
