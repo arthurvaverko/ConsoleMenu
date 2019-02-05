@@ -25,8 +25,19 @@ namespace ConsoleMenuTest
 				var dirInfo = new DirectoryInfo(dPath);
 				return new ConsoleMenuItem<DirectoryInfo>(dirName, DirectoryCallback, dirInfo);
 			});
-			var menu = new ConsoleMenu<DirectoryInfo>($"DIR: {Path.GetFileName(rootDirPath)}....", dirs);
-			menu.RunConsoleMenu();
+
+			var menu = new ConsoleMenu<DirectoryInfo>($"DIR: {Path.GetFileName(rootDirPath)}....", dirs, true);
+			var userPressedEscape = !menu.RunConsoleMenu();
+			if (userPressedEscape && !IsPathRootDirectory(rootDirPath))
+			{
+				Console.Clear();
+				OpenDirectoryBrowserConsole(Directory.GetParent(rootDirPath).FullName);
+			}
+		}
+
+		private static bool IsPathRootDirectory(string rootDirPath)
+		{
+			return Path.GetPathRoot(rootDirPath).Equals(rootDirPath, StringComparison.CurrentCultureIgnoreCase);
 		}
 
 		private static void DirectoryCallback(DirectoryInfo selectedDirInfo)
