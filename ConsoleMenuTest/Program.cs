@@ -24,8 +24,11 @@ namespace ConsoleMenuTest
 				var dirName = Path.GetFileName(dPath);
 				var dirInfo = new DirectoryInfo(dPath);
 				return new ConsoleMenuItem<DirectoryInfo>(dirName, DirectoryCallback, dirInfo);
-			});
-			var menu = new ConsoleMenu<DirectoryInfo>($"DIR: {Path.GetFileName(rootDirPath)}....", dirs);
+			}).ToList();
+
+			dirs.Insert(0, new ConsoleMenuItem<DirectoryInfo>("..", DirectoryCallback, new DirectoryInfo(rootDirPath).Parent));
+
+			var menu = new ConsoleMenu<DirectoryInfo>($"DIR: {Path.GetFileName(rootDirPath)}", dirs);
 			menu.RunConsoleMenu();
 		}
 
