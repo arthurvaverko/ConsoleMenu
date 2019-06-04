@@ -26,7 +26,7 @@ namespace ConsoleUI
 
 			StartConsoleDrawindLoopUntilInputIsMade();
 			
-			// reset the selection flag so we can re-draw the same console if required after selection
+
 			_ItemIsSelcted = false;
 			_MenuItems[_SelectedItemIndex].CallBack.Invoke(_MenuItems[_SelectedItemIndex].UnderlyingObject);
 		}
