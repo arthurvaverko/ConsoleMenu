@@ -4,124 +4,147 @@ using System.Linq;
 
 namespace ConsoleUI
 {
-	public class ConsoleMenu<T>
-	{
-		public ConsoleMenuItem<T>[] _MenuItems { get; set; }
-		private string _Description;
-		private int _SelectedItemIndex = 0;
-		private bool _ItemIsSelcted = false;
+    public class ConsoleMenu<T>
+    {
+        public ConsoleMenuItem<T>[] _MenuItems { get; set; }
+        readonly string _Description;
+        private int _SelectedItemIndex = 0;
+        private bool _ItemIsSelcted = false;
 
-		public ConsoleMenu(string description, IEnumerable<ConsoleMenuItem<T>> menuItems)
-		{
-			_MenuItems = menuItems.ToArray();
-			_Description = description;
-		}
+        public ConsoleMenu(string description, IEnumerable<ConsoleMenuItem<T>> menuItems)
+        {
+            _MenuItems = menuItems.ToArray();
+            _Description = description;
+        }
 
-		public void RunConsoleMenu()
-		{
-			if (!string.IsNullOrEmpty(_Description))
-			{
-				Console.WriteLine($"{_Description}: {Environment.NewLine}");
-			}
+        public void RunConsoleMenu()
+        {
+            if (!string.IsNullOrEmpty(_Description))
+            {
+                Console.WriteLine($"{_Description}: {Environment.NewLine}");
+            }
 
-			StartConsoleDrawindLoopUntilInputIsMade();
-			
-
-			_ItemIsSelcted = false;
-			_MenuItems[_SelectedItemIndex].CallBack.Invoke(_MenuItems[_SelectedItemIndex].UnderlyingObject);
-		}
-
-		private void StartConsoleDrawindLoopUntilInputIsMade()
-		{
-			int topOffset = Console.CursorTop;
-			int bottomOffset = 0;
-			ConsoleKeyInfo kb;
-			Console.CursorVisible = false;
+            StartConsoleDrawindLoopUntilInputIsMade();
 
 
-			while (!_ItemIsSelcted)
-			{
-				for (int i = 0; i < _MenuItems.Length; i++)
-				{
-					WriteConsoleItem(i, _SelectedItemIndex);
-				}
+            _ItemIsSelcted = false;
+            _MenuItems[_SelectedItemIndex].CallBack.Invoke(_MenuItems[_SelectedItemIndex].UnderlyingObject);
+        }
 
-				bottomOffset = Console.CursorTop;
-				kb = Console.ReadKey(true);
-				HandleKeyPress(kb.Key);
-
-				//Reset the cursor to the top of the screen
-				Console.SetCursorPosition(0, topOffset);
-			}
-
-			//set the cursor just after the menu so that the program can continue after the menu
-			Console.SetCursorPosition(0, bottomOffset);
-			Console.CursorVisible = true;
-		}
-
-		private void HandleKeyPress(ConsoleKey pressedKey)
-		{
-			switch (pressedKey)
-			{
-				case ConsoleKey.UpArrow:
-					_SelectedItemIndex = (_SelectedItemIndex == 0) ? _MenuItems.Length - 1 : _SelectedItemIndex - 1;
-					break;
-
-				case ConsoleKey.DownArrow:
-					_SelectedItemIndex = (_SelectedItemIndex == _MenuItems.Length - 1) ? 0 : _SelectedItemIndex + 1;
-					break;
-
-				case ConsoleKey.Enter:
-					_ItemIsSelcted = true;
-					break;
-			}
-		}
-
-		private void WriteConsoleItem(int itemIndex, int selectedItemIndex)
-		{
-			if (itemIndex == selectedItemIndex)
-			{
-				Console.BackgroundColor = ConsoleColor.Gray;
-				Console.ForegroundColor = ConsoleColor.Black;
-			}
-
-			Console.WriteLine(" {0,-20}", this._MenuItems[itemIndex].Name);
-			Console.ResetColor();
-		}
-	}
+        private void StartConsoleDrawindLoopUntilInputIsMade()
+        {
+            int topOffset = Console.CursorTop;
+            int bottomOffset = 0;
+            ConsoleKeyInfo kb;
+            Console.CursorVisible = false;
 
 
-	public class ConsoleMenuItem<T>
-	{
-		public string Name { get; set; }
-		public Action<T> CallBack { get; set; }
-		public T UnderlyingObject { get; set; }
+            while (!_ItemIsSelcted)
+            {
+                for (int i = 0; i < _MenuItems.Length; i++)
+                {
+                    WriteConsoleItem(i, _SelectedItemIndex);
+                }
 
-		public override int GetHashCode()
-		{
-			return Name.GetHashCode() ^ UnderlyingObject.GetHashCode();
-		}
-		public override bool Equals(object obj)
-		{
-			// Check for null values and compare run - time types.
-			if (obj == null || GetType() != obj.GetType())
-				return false;
+                bottomOffset = Console.CursorTop;
+                kb = Console.ReadKey(true);
+                HandleKeyPress(kb.Key);
 
-			var item = (ConsoleMenuItem<T>)obj;
-			return item.GetHashCode() == this.GetHashCode();
-		}
+                //Reset the cursor to the top of the screen
+                Console.SetCursorPosition(0, topOffset);
+            }
 
-		public override string ToString()
-		{
-			return $"{Name} (data: {UnderlyingObject.ToString()})";
-		}
+            //set the cursor just after the menu so that the program can continue after the menu
+            Console.SetCursorPosition(0, bottomOffset);
+            Console.CursorVisible = true;
+        }
 
-		public ConsoleMenuItem(string label, Action<T> callback, T underlyingObject)
-		{
-			Name = label;
-			CallBack = callback;
-			UnderlyingObject = underlyingObject;
-		}
-	}
+        private void HandleKeyPress(ConsoleKey pressedKey)
+        {
+            switch (pressedKey)
+            {
+                case ConsoleKey.UpArrow:
+                    _SelectedItemIndex = (_SelectedItemIndex == 0) ? _MenuItems.Length - 1 : _SelectedItemIndex - 1;
+                    CheckForUnselectable(pressedKey);
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    _SelectedItemIndex = (_SelectedItemIndex == _MenuItems.Length - 1) ? 0 : _SelectedItemIndex + 1;
+                    CheckForUnselectable(pressedKey);
+                    break;
+
+                case ConsoleKey.Enter:
+                    _ItemIsSelcted = true;
+                    break;
+            }
+        }
+        private void CheckForUnselectable(ConsoleKey pressedKey)
+        {
+            if (_MenuItems[_SelectedItemIndex].GetType() == typeof(ConsoleMenuSeperator))
+            {
+                HandleKeyPress(pressedKey);
+            }
+        }
+
+
+        private void WriteConsoleItem(int itemIndex, int selectedItemIndex)
+        {
+            if (itemIndex == selectedItemIndex)
+            {
+                Console.BackgroundColor = ConsoleColor.Gray;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+
+            string text = this._MenuItems[itemIndex].Name;
+            if (_MenuItems[itemIndex].GetType() == typeof(ConsoleMenuSeperator))
+            {
+                text = text.PadRight(_MenuItems.Max(x => x.Name.Length), _MenuItems[itemIndex].Name[0]);
+            }
+            Console.WriteLine(" {0,-20}", text);
+            Console.ResetColor();
+        }
+    }
+
+
+    public class ConsoleMenuItem<T>
+    {
+        public string Name { get; set; }
+        public Action<T> CallBack { get; set; }
+        public T UnderlyingObject { get; set; }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() ^ UnderlyingObject.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            // Check for null values and compare run - time types.
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+
+            var item = (ConsoleMenuItem<T>)obj;
+            return item.GetHashCode() == this.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} (data: {UnderlyingObject.ToString()})";
+        }
+
+        public ConsoleMenuItem(string label, Action<T> callback, T underlyingObject)
+        {
+            Name = label;
+            CallBack = callback;
+            UnderlyingObject = underlyingObject;
+        }
+    }
+
+    public class ConsoleMenuSeperator : ConsoleMenuItem<string>
+    {
+        public ConsoleMenuSeperator(Char seperatorChar = '-')
+            : base(seperatorChar.ToString(), x => { }, null)
+        {
+        }
+    }
 
 }
