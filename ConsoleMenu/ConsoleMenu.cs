@@ -6,12 +6,12 @@ namespace ConsoleUI
 {
     public class ConsoleMenu<T>
     {
-        public ConsoleMenuItem<T>[] _MenuItems { get; set; }
+        public ConsoleMenuItem[] _MenuItems { get; set; }
         readonly string _Description;
         private int _SelectedItemIndex = 0;
         private bool _ItemIsSelcted = false;
 
-        public ConsoleMenu(string description, IEnumerable<ConsoleMenuItem<T>> menuItems)
+        public ConsoleMenu(string description, IEnumerable<ConsoleMenuItem> menuItems)
         {
             _MenuItems = menuItems.ToArray();
             _Description = description;
@@ -28,7 +28,7 @@ namespace ConsoleUI
 
 
             _ItemIsSelcted = false;
-            _MenuItems[_SelectedItemIndex].CallBack.Invoke(_MenuItems[_SelectedItemIndex].UnderlyingObject);
+            _MenuItems[_SelectedItemIndex].Execute();
         }
 
         private void StartConsoleDrawindLoopUntilInputIsMade()
@@ -86,7 +86,6 @@ namespace ConsoleUI
             }
         }
 
-
         private void WriteConsoleItem(int itemIndex, int selectedItemIndex)
         {
             if (itemIndex == selectedItemIndex)
@@ -106,9 +105,19 @@ namespace ConsoleUI
     }
 
 
-    public class ConsoleMenuItem<T>
+    public abstract class ConsoleMenuItem
     {
+        public ConsoleMenuItem(string label)
+        {
+            Name = label;
+        }
         public string Name { get; set; }
+
+
+        public virtual void Execute() { }
+    }
+    public class ConsoleMenuItem<T> : ConsoleMenuItem
+    {
         public Action<T> CallBack { get; set; }
         public T UnderlyingObject { get; set; }
 
@@ -125,26 +134,29 @@ namespace ConsoleUI
             var item = (ConsoleMenuItem<T>)obj;
             return item.GetHashCode() == this.GetHashCode();
         }
-
         public override string ToString()
         {
             return $"{Name} (data: {UnderlyingObject.ToString()})";
         }
 
         public ConsoleMenuItem(string label, Action<T> callback, T underlyingObject)
+            : base(label)
         {
-            Name = label;
             CallBack = callback;
             UnderlyingObject = underlyingObject;
         }
-    }
 
-    public class ConsoleMenuSeperator : ConsoleMenuItem<string>
-    {
-        public ConsoleMenuSeperator(Char seperatorChar = '-')
-            : base(seperatorChar.ToString(), x => { }, null)
+        public override void Execute()
         {
+            CallBack(UnderlyingObject);
         }
     }
 
+    public class ConsoleMenuSeperator : ConsoleMenuItem
+    {
+        public ConsoleMenuSeperator(Char seperatorChar = '-')
+            : base(seperatorChar.ToString())
+        {
+        }
+    }
 }
