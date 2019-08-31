@@ -6,14 +6,14 @@ namespace ConsoleUI
 {
     public class ConsoleMenu<T>
     {
-        public ConsoleMenuItem<T>[] _MenuItems { get; set; }
+        private ConsoleMenuItem[] _menuItems;
         readonly string _Description;
         private int _SelectedItemIndex = 0;
         private bool _ItemIsSelcted = false;
 
-        public ConsoleMenu(string description, IEnumerable<ConsoleMenuItem<T>> menuItems)
+        public ConsoleMenu(string description, IEnumerable<ConsoleMenuItem> menuItems)
         {
-            _MenuItems = menuItems.ToArray();
+            _menuItems = menuItems.ToArray();
             _Description = description;
         }
 
@@ -28,7 +28,7 @@ namespace ConsoleUI
 
 
             _ItemIsSelcted = false;
-            _MenuItems[_SelectedItemIndex].CallBack.Invoke(_MenuItems[_SelectedItemIndex].UnderlyingObject);
+            _menuItems[_SelectedItemIndex].Execute();
         }
 
         private void StartConsoleDrawindLoopUntilInputIsMade()
@@ -41,7 +41,7 @@ namespace ConsoleUI
 
             while (!_ItemIsSelcted)
             {
-                for (int i = 0; i < _MenuItems.Length; i++)
+                for (int i = 0; i < _menuItems.Length; i++)
                 {
                     WriteConsoleItem(i, _SelectedItemIndex);
                 }
@@ -64,12 +64,12 @@ namespace ConsoleUI
             switch (pressedKey)
             {
                 case ConsoleKey.UpArrow:
-                    _SelectedItemIndex = (_SelectedItemIndex == 0) ? _MenuItems.Length - 1 : _SelectedItemIndex - 1;
+                    _SelectedItemIndex = (_SelectedItemIndex == 0) ? _menuItems.Length - 1 : _SelectedItemIndex - 1;
                     CheckForUnselectable(pressedKey);
                     break;
 
                 case ConsoleKey.DownArrow:
-                    _SelectedItemIndex = (_SelectedItemIndex == _MenuItems.Length - 1) ? 0 : _SelectedItemIndex + 1;
+                    _SelectedItemIndex = (_SelectedItemIndex == _menuItems.Length - 1) ? 0 : _SelectedItemIndex + 1;
                     CheckForUnselectable(pressedKey);
                     break;
 
@@ -80,12 +80,11 @@ namespace ConsoleUI
         }
         private void CheckForUnselectable(ConsoleKey pressedKey)
         {
-            if (_MenuItems[_SelectedItemIndex].GetType() == typeof(ConsoleMenuSeperator))
+            if (_menuItems[_SelectedItemIndex].GetType() == typeof(ConsoleMenuSeperator))
             {
                 HandleKeyPress(pressedKey);
             }
         }
-
 
         private void WriteConsoleItem(int itemIndex, int selectedItemIndex)
         {
@@ -95,10 +94,10 @@ namespace ConsoleUI
                 Console.ForegroundColor = ConsoleColor.Black;
             }
 
-            string text = this._MenuItems[itemIndex].Name;
-            if (_MenuItems[itemIndex].GetType() == typeof(ConsoleMenuSeperator))
+            string text = this._menuItems[itemIndex].Name;
+            if (_menuItems[itemIndex].GetType() == typeof(ConsoleMenuSeperator))
             {
-                text = text.PadRight(_MenuItems.Max(x => x.Name.Length), _MenuItems[itemIndex].Name[0]);
+                text = text.PadRight(_menuItems.Max(x => x.Name.Length), _menuItems[itemIndex].Name[0]);
             }
             Console.WriteLine(" {0,-20}", text);
             Console.ResetColor();
@@ -106,9 +105,19 @@ namespace ConsoleUI
     }
 
 
-    public class ConsoleMenuItem<T>
+    public abstract class ConsoleMenuItem
     {
+        public ConsoleMenuItem(string label)
+        {
+            Name = label;
+        }
         public string Name { get; set; }
+
+
+        public virtual void Execute() { }
+    }
+    public class ConsoleMenuItem<T> : ConsoleMenuItem
+    {
         public Action<T> CallBack { get; set; }
         public T UnderlyingObject { get; set; }
 
@@ -125,26 +134,29 @@ namespace ConsoleUI
             var item = (ConsoleMenuItem<T>)obj;
             return item.GetHashCode() == this.GetHashCode();
         }
-
         public override string ToString()
         {
             return $"{Name} (data: {UnderlyingObject.ToString()})";
         }
 
         public ConsoleMenuItem(string label, Action<T> callback, T underlyingObject)
+            : base(label)
         {
-            Name = label;
             CallBack = callback;
             UnderlyingObject = underlyingObject;
         }
-    }
 
-    public class ConsoleMenuSeperator : ConsoleMenuItem<string>
-    {
-        public ConsoleMenuSeperator(Char seperatorChar = '-')
-            : base(seperatorChar.ToString(), x => { }, null)
+        public override void Execute()
         {
+            CallBack(UnderlyingObject);
         }
     }
 
+    public class ConsoleMenuSeperator : ConsoleMenuItem
+    {
+        public ConsoleMenuSeperator(Char seperatorChar = '-')
+            : base(seperatorChar.ToString())
+        {
+        }
+    }
 }
